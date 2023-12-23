@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\ApiUtilities.Common\ApiUtilities.Common.csproj" />
+    <ProjectReference Include="..\..\src\ApiUtilities.Common\ApiUtilities.Common.csproj" />
   </ItemGroup>
 
 </Project>
