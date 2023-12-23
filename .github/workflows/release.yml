@@ -15,9 +15,9 @@ jobs:
     - name: Change Directory
       run: cd ApiUtilities/src
     - name: Build
-      run: dotnet build -c Release ./ApiUtilities.Common.csproj
+      run: dotnet build -c Release ./ApiUtilities.Common/ApiUtilities.Common.csproj
     - name: Pack nugets
-      run: dotnet pack -c Release ./ApiUtilities.Common.csproj --no-build --output .
+      run: dotnet pack -c Release ./ApiUtilities.Common/ApiUtilities.Common.csproj --no-build --output .
     - name: Run Tests
       run: dotnet test -c Release ../tests/ApiUtilities.Tests/ApiUtilities.Tests.csproj
     - name: Push to NuGet
