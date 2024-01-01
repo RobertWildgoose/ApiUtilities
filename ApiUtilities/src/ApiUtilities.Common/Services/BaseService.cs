@@ -1,4 +1,5 @@
-﻿using ApiUtilities.Common.Interfaces;
+﻿using ApiUtilities.Common.Handlers;
+using ApiUtilities.Common.Interfaces;
 using ApiUtilities.Common.Models;
 using Newtonsoft.Json;
 using System;
@@ -24,8 +25,10 @@ namespace ApiUtilities.Common.Services
 
 		public async Task<T> GetData<T>(string url) where T : BaseResponse
 		{
+
 			if(ValidateInputs(url))
 			{
+				_requestHandler.RefreshHandler();
 				var response = await ValidateResponse($"{_apiConfig.BaseUrl}{url}");
 				try
 				{
@@ -46,6 +49,7 @@ namespace ApiUtilities.Common.Services
 		{
 			if (ValidateInputs(url))
 			{
+				_requestHandler.RefreshHandler();
 				var response = await ValidateResponse($"{_apiConfig.BaseUrl}{url}");
 				try
 				{

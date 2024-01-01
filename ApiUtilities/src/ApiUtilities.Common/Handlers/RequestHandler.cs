@@ -1,7 +1,10 @@
 ﻿using ApiUtilities.Common.Interfaces;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,16 +13,17 @@ namespace ApiUtilities.Common.Handlers
 	public class RequestHandler : IRequestHandler
 	{
 		private readonly IExceptionHandler _exceptionHandler;
-		private readonly HttpClient _httpClient;
+		private HttpClient _httpClient;
+		private Dictionary<string,string> _requestHeaders;
         public RequestHandler(IExceptionHandler exceptionHandler)
         {
 			_exceptionHandler = exceptionHandler;
-			_httpClient = new HttpClient();
+			_requestHeaders = new Dictionary<string, string>();
 		}
 
         public void AddHeader(string key, string value)
 		{
-			_httpClient.DefaultRequestHeaders.Add(key, value);
+			_requestHeaders.TryAdd(key, value);
 		}
 
 		public async Task<string> GetAsync(string url)
@@ -44,6 +48,15 @@ namespace ApiUtilities.Common.Handlers
 						throw ex;
                     }
 				}
+			}
+		}
+
+		public void RefreshHandler()
+		{
+			_httpClient = new HttpClient();
+			foreach (var item in _requestHeaders)
+			{
+				_httpClient.DefaultRequestHeaders.Add(item.Key, item.Value);
 			}
 		}
 	}
