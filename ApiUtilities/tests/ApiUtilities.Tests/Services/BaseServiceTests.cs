@@ -17,14 +17,12 @@ namespace ApiUtilities.Tests.Services
 	{
 		private BaseService _subjectUnderTest { get; set; }
 		private Mock<IRequestHandler> _requestHandlerMock { get; set; }
-		private Mock<IExceptionHandler> _exceptionHandlerMock { get; set; }
 		private Mock<IApiConfig> _apiConfigMock { get; set; }
 
 
 		private void ResetMocks()
 		{
 			_requestHandlerMock = new Mock<IRequestHandler>();
-			_exceptionHandlerMock = new Mock<IExceptionHandler>();
 			_apiConfigMock = new Mock<IApiConfig>();
 		}
 
@@ -32,178 +30,209 @@ namespace ApiUtilities.Tests.Services
 		[InlineData(null)]
 		[InlineData("")]
 		[InlineData(" ")]
-		public async Task GetData_WhenBaseUrlIsInvalid_ShouldHandleMissingFieldException(string baseUrl)
+		public async Task Get_WhenBaseUrlIsInvalid_ShouldReturnMissingFieldError(string baseUrl)
 		{
 			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<MissingFieldException>())).Returns(true);
 			_apiConfigMock.SetupProperty(a => a.BaseUrl, baseUrl);
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var responseData = await _subjectUnderTest.GetData<TestResponseModel>("/valid");
-			_exceptionHandlerMock.Verify(a => a.HandleException(It.IsAny<MissingFieldException>()),Times.Once);
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
+
+			var responseData = await _subjectUnderTest.Get<TestResponseModel>("/invalid_base_url");
+
+			Assert.False(responseData.Success);
+			Assert.Null(responseData.Data);
+			Assert.Equal("InvalidUrl", responseData.Error);
 		}
 
 		[Theory]
 		[InlineData(null)]
 		[InlineData("")]
 		[InlineData(" ")]
-		public async Task GetData_WhenBaseUrlIsInvalid_ShouldThrowMissingFieldException(string baseUrl)
+		public async Task GetEnumerable_WhenBaseUrlIsInvalid_ShouldReturnMissingFieldError(string baseUrl)
 		{
 			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<MissingFieldException>())).Returns(false);
 			_apiConfigMock.SetupProperty(a => a.BaseUrl, baseUrl);
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var exception = await Assert.ThrowsAsync<MissingFieldException>(async () => await _subjectUnderTest.GetData<TestResponseModel>("/valid"));
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
+
+			var responseData = await _subjectUnderTest.GetEnumerable<TestResponseModel>("/invalid_base_url");
+
+			Assert.False(responseData.Success);
+			Assert.Null(responseData.Data);
+			Assert.Equal("InvalidUrl", responseData.Error);
 		}
 
 		[Theory]
 		[InlineData(null)]
 		[InlineData("")]
 		[InlineData(" ")]
-		public async Task GetData_WhenUrlIsInvalid_ShouldHandleMissingFieldException(string url)
+		public async Task Get_WhenUrlIsInvalid_ShouldReturnMissingFieldError(string url)
 		{
 			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<MissingFieldException>())).Returns(true);
-			_apiConfigMock.SetupProperty(a => a.BaseUrl, null);
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var responseData = await _subjectUnderTest.GetData<TestResponseModel>(url);
-			_exceptionHandlerMock.Verify(a => a.HandleException(It.IsAny<MissingFieldException>()), Times.Once);
+			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
+
+			var responseData = await _subjectUnderTest.Get<TestResponseModel>(url);
+
+			Assert.False(responseData.Success);
+			Assert.Null(responseData.Data);
+			Assert.Equal("InvalidUrl", responseData.Error);
 		}
 
 		[Theory]
 		[InlineData(null)]
 		[InlineData("")]
 		[InlineData(" ")]
-		public async Task GetData_WhenUrlIsInvalid_ShouldThrowMissingFieldException(string url)
+		public async Task GetEnumerable_WhenUrlIsInvalid_ShouldReturnMissingFieldError(string url)
 		{
 			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<MissingFieldException>())).Returns(false);
-			_apiConfigMock.SetupProperty(a => a.BaseUrl, null);
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var exception = await Assert.ThrowsAsync<MissingFieldException>(async () => await _subjectUnderTest.GetData<TestResponseModel>(url));
+			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
+
+			var responseData = await _subjectUnderTest.GetEnumerable<TestResponseModel>(url);
+
+			Assert.False(responseData.Success);
+			Assert.Null(responseData.Data);
+			Assert.Equal("InvalidUrl", responseData.Error);
 		}
 
 		[Fact]
-		public async Task GetData_WhenDataIsEmpty_ShouldHandlesInvalidDataException()
+		public async Task Get_WhenResponseDataIsEmpty_ShouldReturnError()
 		{
 			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<InvalidDataException>())).Returns(true);
-			_requestHandlerMock.Setup(a => a.GetAsync("https://www.validUrl.com/empty")).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
-			_apiConfigMock.SetupProperty(a => a.BaseUrl, "https://www.validUrl.com");
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var responseData = await _subjectUnderTest.GetData<TestResponseModel>("/empty");
-			_exceptionHandlerMock.Verify(a => a.HandleException(It.IsAny<InvalidDataException>()), Times.Once);
+			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
+			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/empty_response")).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
+
+			var responseData = await _subjectUnderTest.Get<TestResponseModel>("/empty_response");
+
+			Assert.False(responseData.Success);
+			Assert.Null(responseData.Data);
+			Assert.Equal("InvalidDataException", responseData.Error);
 		}
 
 		[Fact]
-		public async Task GetData_WhenDataIsEmpty_ShouldThrowInvalidDataException()
+		public async Task GetEnumerable_WhenResponseDataIsEmpty_ShouldReturnError()
 		{
 			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<InvalidDataException>())).Returns(false);
-			_requestHandlerMock.Setup(a => a.GetAsync("https://www.validUrl.com/empty")).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
-			_apiConfigMock.SetupProperty(a => a.BaseUrl, "https://www.validUrl.com");
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var exception = await Assert.ThrowsAsync<InvalidDataException>(async () => await _subjectUnderTest.GetData<TestResponseModel>("/empty"));
+			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
+			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/empty_response")).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
+
+			var responseData = await _subjectUnderTest.GetEnumerable<TestResponseModel>("/empty_response");
+
+			Assert.False(responseData.Success);
+			Assert.Null(responseData.Data);
+			Assert.Equal("InvalidDataException", responseData.Error);
 		}
 
-
 		[Fact]
-		public async Task GetData_WhenDataIsValid_ShouldReturnValidObject()
+		public async Task Get_WhenResponseDataIsValid_ShouldReturnValidObject()
 		{
 			ResetMocks();
-			_requestHandlerMock.Setup(a => a.GetAsync("https://www.validUrl.com/valid")).ReturnsAsync(TestResponseModel_Data.ValidDataObject);
-			_apiConfigMock.SetupProperty(a => a.BaseUrl, "https://www.validUrl.com");
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var responseData = await _subjectUnderTest.GetData<TestResponseModel>("/valid");
-			responseData.Should().NotBeNull();
+			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
+			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/valid")).ReturnsAsync(TestResponseModel_Data.ValidDataObject);
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
+
+			var responseData = await _subjectUnderTest.Get<TestResponseModel>("/valid");
+
+			Assert.True(responseData.Success);
+			Assert.NotNull(responseData.Data);
+			Assert.Null(responseData.Error);
+		}
+
+		[Fact]
+		public async Task GetEnumerable_WhenResponseDataIsValid_ShouldReturnValidObject()
+		{
+			ResetMocks();
+			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
+			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/valid")).ReturnsAsync(TestResponseModel_Data.ValidListDataObject);
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
+
+			var responseData = await _subjectUnderTest.GetEnumerable<TestResponseModel>("/valid");
+
+			Assert.True(responseData.Success);
+			Assert.NotNull(responseData.Data);
+			Assert.Equal(4, responseData.Data.Count);
+			Assert.Null(responseData.Error);
 		}
 
 		[Theory]
 		[InlineData(null)]
 		[InlineData("")]
 		[InlineData(" ")]
-		public async Task GetDataList_WhenBaseUrlIsInvalid_ShouldHandlesMissingFieldException(string baseUrl)
+		public async Task Post_WhenBaseUrlIsInvalid_ShouldReturnMissingFieldError(string baseUrl)
 		{
 			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<MissingFieldException>())).Returns(true);
 			_apiConfigMock.SetupProperty(a => a.BaseUrl, baseUrl);
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var responseData = await _subjectUnderTest.GetDataList<TestResponseModel>("/valid");
-			_exceptionHandlerMock.Verify(a => a.HandleException(It.IsAny<MissingFieldException>()), Times.Once);
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
+
+			var responseData = await _subjectUnderTest.Post<TestResponseModel>("/invalid_base_url","postData");
+
+			Assert.False(responseData.Success);
+			Assert.Null(responseData.Data);
+			Assert.Equal("InvalidUrl", responseData.Error);
 		}
 
 		[Theory]
 		[InlineData(null)]
 		[InlineData("")]
 		[InlineData(" ")]
-		public async Task GetDataList_WhenBaseUrlIsInvalid_ShouldThrowMissingFieldException(string baseUrl)
+		public async Task Post_WhenUrlIsInvalid_ShouldReturnMissingFieldError(string url)
 		{
 			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<MissingFieldException>())).Returns(false);
-			_apiConfigMock.SetupProperty(a => a.BaseUrl, baseUrl);
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var exception = await Assert.ThrowsAsync<MissingFieldException>(async () => await _subjectUnderTest.GetDataList<TestResponseModel>("/valid"));
-		}
+			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
 
-		[Theory]
-		[InlineData(null)]
-		[InlineData("")]
-		[InlineData(" ")]
-		public async Task GetDataList_WhenUrlIsInvalid_ShouldHandlesMissingFieldException(string url)
-		{
-			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<MissingFieldException>())).Returns(true);
-			_apiConfigMock.SetupProperty(a => a.BaseUrl, "https://www.validUrl.com");
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var responseData = await _subjectUnderTest.GetDataList<TestResponseModel>(url);
-			_exceptionHandlerMock.Verify(a => a.HandleException(It.IsAny<MissingFieldException>()), Times.Once);
-		}
+			var responseData = await _subjectUnderTest.Post<TestResponseModel>(url,"postData");
 
-		[Theory]
-		[InlineData(null)]
-		[InlineData("")]
-		[InlineData(" ")]
-		public async Task GetDataList_WhenUrlIsInvalid_ShouldThrowMissingFieldException(string url)
-		{
-			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<MissingFieldException>())).Returns(false);
-			_apiConfigMock.SetupProperty(a => a.BaseUrl, "https://www.validUrl.com");
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var exception = await Assert.ThrowsAsync<MissingFieldException>(async () => await _subjectUnderTest.GetDataList<TestResponseModel>(url));
+			Assert.False(responseData.Success);
+			Assert.Null(responseData.Data);
+			Assert.Equal("InvalidUrl", responseData.Error);
 		}
 
 		[Fact]
-		public async Task GetDataList_WhenDataIsEmpty_ShouldhandlesInvalidDataException()
+		public async Task Post_WhenPostDataIsnull_ShouldReturnError()
 		{
 			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<InvalidDataException>())).Returns(true);
-			_requestHandlerMock.Setup(a => a.GetAsync("https://www.validUrl.com/empty")).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
-			_apiConfigMock.SetupProperty(a => a.BaseUrl, "https://www.validUrl.com");
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var responseData = await _subjectUnderTest.GetDataList<TestResponseModel>("/empty");
-			_exceptionHandlerMock.Verify(a => a.HandleException(It.IsAny<InvalidDataException>()), Times.Once);
+			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
+			_requestHandlerMock.Setup(a => a.PostAsync("http://www.baseurl.com/empty_response", null)).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
+
+			var responseData = await _subjectUnderTest.Post<TestResponseModel>("/empty_response", null);
+
+			Assert.False(responseData.Success);
+			Assert.Null(responseData.Data);
+			Assert.Equal("PostDataInvalid", responseData.Error);
 		}
 
 		[Fact]
-		public async Task GetDataList_WhenDataIsEmpty_ShouldThrowInvalidDataException()
+		public async Task Post_WhenResponseDataIsEmpty_ShouldReturnError()
 		{
 			ResetMocks();
-			_exceptionHandlerMock.Setup(a => a.CanHandle(It.IsAny<InvalidDataException>())).Returns(false);
-			_requestHandlerMock.Setup(a => a.GetAsync("https://www.validUrl.com/empty")).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
-			_apiConfigMock.SetupProperty(a => a.BaseUrl, "https://www.validUrl.com");
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var exception = await Assert.ThrowsAsync<InvalidDataException>(async () => await _subjectUnderTest.GetDataList<TestResponseModel>("/empty"));
-		}
+			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
+			_requestHandlerMock.Setup(a => a.PostAsync("http://www.baseurl.com/empty_response", It.IsAny<string>())).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
 
+			var responseData = await _subjectUnderTest.Post<TestResponseModel>("/empty_response","postData");
+
+			Assert.False(responseData.Success);
+			Assert.Null(responseData.Data);
+			Assert.Equal("InvalidDataException", responseData.Error);
+		}
 
 		[Fact]
-		public async Task GetDataList_WhenDataIsValid_ShouldReturnValidObject()
+		public async Task Post_WhenResponseDataIsValid_ShouldReturnValidObject()
 		{
 			ResetMocks();
-			_requestHandlerMock.Setup(a => a.GetAsync("https://www.validUrl.com/valid")).ReturnsAsync(TestResponseModel_Data.ValidListDataObject);
-			_apiConfigMock.SetupProperty(a => a.BaseUrl, "https://www.validUrl.com");
-			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _exceptionHandlerMock.Object, _requestHandlerMock.Object);
-			var responseData = await _subjectUnderTest.GetDataList<TestResponseModel>("/valid");
-			responseData.Count.Should().Be(4);
+			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
+			_requestHandlerMock.Setup(a => a.PostAsync("http://www.baseurl.com/valid",It.IsAny<string>())).ReturnsAsync(TestResponseModel_Data.ValidDataObject);
+			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
+
+			var responseData = await _subjectUnderTest.Post<TestResponseModel>("/valid","postData");
+
+			Assert.True(responseData.Success);
+			Assert.NotNull(responseData.Data);
+			Assert.Null(responseData.Error);
 		}
+
 	}
 }

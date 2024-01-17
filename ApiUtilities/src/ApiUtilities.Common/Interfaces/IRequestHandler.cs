@@ -10,6 +10,8 @@ namespace ApiUtilities.Common.Interfaces
 	{
 		public void AddHeader(string key, string value);
 		public Task<string> GetAsync(string url);
+
+		public Task<string> PostAsync(string url, string data);
 		public void RefreshHandler();
 
 	}

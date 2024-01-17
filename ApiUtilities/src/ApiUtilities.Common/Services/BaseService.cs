@@ -12,89 +12,114 @@ namespace ApiUtilities.Common.Services
 {
 	public class BaseService
 	{
-		private readonly IExceptionHandler _exceptionHandler;
 		private readonly IRequestHandler _requestHandler;
 		private readonly IApiConfig _apiConfig;
 
-		public BaseService(IApiConfig apiConfig, IExceptionHandler exceptionHandler, IRequestHandler requestHandler) 
+		public BaseService(IApiConfig apiConfig, IRequestHandler requestHandler) 
 		{
-			_exceptionHandler = exceptionHandler;
 			_requestHandler = requestHandler;
 			_apiConfig = apiConfig;
 		}
 
-		public async Task<T> GetData<T>(string url) where T : BaseResponse
+		public async Task<ResponseContainer<T>> Get<T>(string url) where T : BaseResponse
 		{
-
-			if(ValidateInputs(url))
+			if (!string.IsNullOrWhiteSpace(_apiConfig.BaseUrl) && !string.IsNullOrWhiteSpace(url))
 			{
 				_requestHandler.RefreshHandler();
-				var response = await ValidateResponse($"{_apiConfig.BaseUrl}{url}");
-				try
+				var response = await _requestHandler.GetAsync($"{_apiConfig.BaseUrl}{url}");
+				if (!string.IsNullOrWhiteSpace(response))
 				{
-					return JsonConvert.DeserializeObject<T>(response ?? string.Empty);
-				}
-				catch (Exception ex)
-				{
-					if (_exceptionHandler.CanHandle(ex))
+					try
 					{
-						_exceptionHandler.HandleException(ex);
+						var data = JsonConvert.DeserializeObject<T>(response ?? string.Empty);
+						return new ResponseContainer<T>() { Data = data, Error = null };
+					}
+					catch (Exception ex)
+					{
+						return new ResponseContainer<T>() { Data = null, Error = ex.ToString() };
 					}
 				}
-			}
-			return null;
-		}
-
-		public async Task<List<T>> GetDataList<T>(string url) where T : BaseResponse
-		{
-			if (ValidateInputs(url))
-			{
-				_requestHandler.RefreshHandler();
-				var response = await ValidateResponse($"{_apiConfig.BaseUrl}{url}");
-				try
+				else
 				{
-					return JsonConvert.DeserializeObject<List<T>>(response ?? string.Empty);
+					return new ResponseContainer<T>() { Data = null, Error = "InvalidDataException" };
 				}
-				catch (Exception ex)
-				{
-					if (_exceptionHandler.CanHandle(ex))
-					{
-						_exceptionHandler.HandleException(ex);
-					}
-				}
-			}
-			return null;
-		}
-
-		private async Task<string> ValidateResponse(string url)
-		{
-			var response = await _requestHandler.GetAsync(url);
-			if (string.IsNullOrWhiteSpace(response))
-			{
-				HandleOrThrowException(new InvalidDataException());
-			}
-			return response;
-		}
-
-		private bool ValidateInputs(string url)
-		{
-			if (string.IsNullOrWhiteSpace(_apiConfig.BaseUrl) || string.IsNullOrWhiteSpace(url)) 
-			{
-				HandleOrThrowException(new MissingFieldException(string.IsNullOrWhiteSpace(_apiConfig.BaseUrl) ? nameof(_apiConfig.BaseUrl) : nameof(url)));
-				return false;
-			}
-			return true;
-		}
-
-		private void HandleOrThrowException(Exception ex)
-		{
-			if (_exceptionHandler.CanHandle(ex))
-			{
-				_exceptionHandler.HandleException(ex);
 			}
 			else
 			{
-				throw ex;
+				return new ResponseContainer<T>() { Data = null, Error = "InvalidUrl" };
+			}
+		}
+
+		public async Task<ResponseContainer<List<T>>> GetEnumerable<T>(string url) where T : BaseResponse
+		{
+			if (!string.IsNullOrWhiteSpace(_apiConfig.BaseUrl) && !string.IsNullOrWhiteSpace(url))
+			{
+				_requestHandler.RefreshHandler();
+				var response = await _requestHandler.GetAsync($"{_apiConfig.BaseUrl}{url}");
+				if (!string.IsNullOrWhiteSpace(response))
+				{
+					try
+					{
+						var data = JsonConvert.DeserializeObject<List<T>>(response ?? string.Empty);
+						return new ResponseContainer<List<T>>() { Data = data, Error = null };
+					}
+					catch (Exception ex)
+					{
+						return new ResponseContainer<List<T>>() { Data = null, Error = ex.ToString() };
+					}
+				}
+				else
+				{
+					return new ResponseContainer<List<T>>() { Data = null, Error = "InvalidDataException" };
+				}
+			}
+			else
+			{
+				return new ResponseContainer<List<T>>() { Data = null, Error = "InvalidUrl" };
+			}
+		}
+
+		public async Task<ResponseContainer<T>> Post<T>(string url, object data) where T : BaseResponse
+		{
+			if (!string.IsNullOrWhiteSpace(_apiConfig.BaseUrl) && !string.IsNullOrWhiteSpace(url))
+			{
+				if (data != null)
+				{
+					var payload = JsonConvert.SerializeObject(data);
+					if (!string.IsNullOrEmpty(payload))
+					{
+						_requestHandler.RefreshHandler();
+						var response = await _requestHandler.PostAsync($"{_apiConfig.BaseUrl}{url}", payload);
+						if (!string.IsNullOrWhiteSpace(response))
+						{
+							try
+							{
+								var returnedData = JsonConvert.DeserializeObject<T>(response ?? string.Empty);
+								return new ResponseContainer<T>() { Data = returnedData, Error = null };
+							}
+							catch (Exception ex)
+							{
+								return new ResponseContainer<T>() { Data = null, Error = ex.ToString() };
+							}
+						}
+						else
+						{
+							return new ResponseContainer<T>() { Data = null, Error = "InvalidDataException" };
+						}
+					}
+					else
+					{
+						return new ResponseContainer<T>() { Data = null, Error = "PostDataInvalid" };
+					}
+				}
+				else
+				{
+					return new ResponseContainer<T>() { Data = null, Error = "PostDataInvalid" };
+				}
+			}
+			else
+			{
+				return new ResponseContainer<T>() { Data = null, Error = "InvalidUrl" };
 			}
 		}
 	}

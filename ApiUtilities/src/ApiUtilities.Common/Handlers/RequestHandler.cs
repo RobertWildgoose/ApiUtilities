@@ -12,15 +12,14 @@ namespace ApiUtilities.Common.Handlers
 {
 	public class RequestHandler : IRequestHandler
 	{
-		private readonly IExceptionHandler _exceptionHandler;
 		private HttpClient _httpClient;
 		private Dictionary<string,string> _requestHeaders;
-        public RequestHandler(IExceptionHandler exceptionHandler)
+        public RequestHandler()
         {
-			_exceptionHandler = exceptionHandler;
 			_requestHeaders = new Dictionary<string, string>();
 		}
-
+		//TODO: Add In Attributed Headers 
+		//Headers that are gained from api calls that need to be appended to the request through use.
         public void AddHeader(string key, string value)
 		{
 			_requestHeaders.TryAdd(key, value);
@@ -38,15 +37,25 @@ namespace ApiUtilities.Common.Handlers
 				}
 				catch (HttpRequestException ex)
 				{
-					if (_exceptionHandler.CanHandle(ex))
-					{
-						_exceptionHandler.HandleException(ex);
-						return null;
-					}
-                    else
-                    {
-						throw ex;
-                    }
+					throw ex;
+				}
+			}
+		}
+
+		public async Task<string> PostAsync(string url, string data)
+		{
+			using (HttpClient client = _httpClient)
+			{
+				try
+				{
+					var content = new StringContent(data);
+					HttpResponseMessage response = await client.PostAsync(url,content);
+					response.EnsureSuccessStatusCode();
+					return await response.Content.ReadAsStringAsync();
+				}
+				catch (HttpRequestException ex)
+				{
+					throw ex;
 				}
 			}
 		}

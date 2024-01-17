@@ -13,7 +13,6 @@ namespace ApiUtilities.Common
 	{
         public BaseRegistrationContainer(IServiceCollection collection)
         {
-            collection.AddSingleton<IExceptionHandler, ExceptionHandler>();
 			collection.AddSingleton<IRequestHandler, RequestHandler>();
 			ExtendRegistration(collection);
 		}

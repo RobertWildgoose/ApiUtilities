@@ -8,7 +8,11 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/RobertWildgoose/ApiUtilities</RepositoryUrl>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
+    <Title>Api Utilities Common</Title>
+    <Authors>Robert Wildgoose</Authors>
+    <Company>Robert Wildgoose</Company>
+    <Description>APIUtilities is a comprehensive library designed to accelerate the development of API wrapper NuGet packages.</Description>
   </PropertyGroup>
 
   <ItemGroup>
