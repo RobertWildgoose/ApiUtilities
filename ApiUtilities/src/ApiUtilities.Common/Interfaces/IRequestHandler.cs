@@ -9,9 +9,9 @@ namespace ApiUtilities.Common.Interfaces
 	public interface IRequestHandler
 	{
 		public void AddHeader(string key, string value);
-		public Task<string> GetAsync(string url);
+		public Task<string> GetAsync(string url, bool requireSuccess = true);
 
-		public Task<string> PostAsync(string url, string data);
+		public Task<string> PostAsync(string url, string data, bool requireSuccess = true);
 		public void RefreshHandler();
 
 	}

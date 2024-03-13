@@ -99,7 +99,7 @@ namespace ApiUtilities.Tests.Services
 		{
 			ResetMocks();
 			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
-			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/empty_response")).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
+			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/empty_response",It.IsAny<bool>())).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
 			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
 
 			var responseData = await _subjectUnderTest.Get<TestResponseModel>("/empty_response");
@@ -114,7 +114,7 @@ namespace ApiUtilities.Tests.Services
 		{
 			ResetMocks();
 			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
-			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/empty_response")).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
+			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/empty_response", It.IsAny<bool>())).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
 			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
 
 			var responseData = await _subjectUnderTest.GetEnumerable<TestResponseModel>("/empty_response");
@@ -129,7 +129,7 @@ namespace ApiUtilities.Tests.Services
 		{
 			ResetMocks();
 			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
-			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/valid")).ReturnsAsync(TestResponseModel_Data.ValidDataObject);
+			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/valid", It.IsAny<bool>())).ReturnsAsync(TestResponseModel_Data.ValidDataObject);
 			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
 
 			var responseData = await _subjectUnderTest.Get<TestResponseModel>("/valid");
@@ -144,7 +144,7 @@ namespace ApiUtilities.Tests.Services
 		{
 			ResetMocks();
 			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
-			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/valid")).ReturnsAsync(TestResponseModel_Data.ValidListDataObject);
+			_requestHandlerMock.Setup(a => a.GetAsync("http://www.baseurl.com/valid", It.IsAny<bool>())).ReturnsAsync(TestResponseModel_Data.ValidListDataObject);
 			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
 
 			var responseData = await _subjectUnderTest.GetEnumerable<TestResponseModel>("/valid");
@@ -194,7 +194,7 @@ namespace ApiUtilities.Tests.Services
 		{
 			ResetMocks();
 			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
-			_requestHandlerMock.Setup(a => a.PostAsync("http://www.baseurl.com/empty_response", null)).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
+			_requestHandlerMock.Setup(a => a.PostAsync("http://www.baseurl.com/empty_response", null, It.IsAny<bool>())).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
 			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
 
 			var responseData = await _subjectUnderTest.Post<TestResponseModel>("/empty_response", null);
@@ -209,7 +209,7 @@ namespace ApiUtilities.Tests.Services
 		{
 			ResetMocks();
 			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
-			_requestHandlerMock.Setup(a => a.PostAsync("http://www.baseurl.com/empty_response", It.IsAny<string>())).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
+			_requestHandlerMock.Setup(a => a.PostAsync("http://www.baseurl.com/empty_response", It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(TestResponseModel_Data.EmptyDataObject);
 			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
 
 			var responseData = await _subjectUnderTest.Post<TestResponseModel>("/empty_response","postData");
@@ -224,7 +224,7 @@ namespace ApiUtilities.Tests.Services
 		{
 			ResetMocks();
 			_apiConfigMock.SetupProperty(a => a.BaseUrl, "http://www.baseurl.com");
-			_requestHandlerMock.Setup(a => a.PostAsync("http://www.baseurl.com/valid",It.IsAny<string>())).ReturnsAsync(TestResponseModel_Data.ValidDataObject);
+			_requestHandlerMock.Setup(a => a.PostAsync("http://www.baseurl.com/valid",It.IsAny<string>(),It.IsAny<bool>())).ReturnsAsync(TestResponseModel_Data.ValidDataObject);
 			_subjectUnderTest = new BaseService(_apiConfigMock.Object, _requestHandlerMock.Object);
 
 			var responseData = await _subjectUnderTest.Post<TestResponseModel>("/valid","postData");

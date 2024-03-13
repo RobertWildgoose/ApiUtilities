@@ -25,14 +25,14 @@ namespace ApiUtilities.Common.Handlers
 			_requestHeaders.TryAdd(key, value);
 		}
 
-		public async Task<string> GetAsync(string url)
+		public async Task<string> GetAsync(string url, bool requireSuccess = true)
 		{
 			using (HttpClient client = _httpClient)
 			{
 				try
 				{
 					HttpResponseMessage response = await client.GetAsync(url);
-					response.EnsureSuccessStatusCode();
+					if (requireSuccess) { response.EnsureSuccessStatusCode(); }
 					return await response.Content.ReadAsStringAsync();
 				}
 				catch (HttpRequestException ex)
@@ -42,7 +42,7 @@ namespace ApiUtilities.Common.Handlers
 			}
 		}
 
-		public async Task<string> PostAsync(string url, string data)
+		public async Task<string> PostAsync(string url, string data, bool requireSuccess = true)
 		{
 			using (HttpClient client = _httpClient)
 			{
@@ -50,7 +50,7 @@ namespace ApiUtilities.Common.Handlers
 				{
 					var content = new StringContent(data);
 					HttpResponseMessage response = await client.PostAsync(url,content);
-					response.EnsureSuccessStatusCode();
+                    if (requireSuccess) { response.EnsureSuccessStatusCode(); }
 					return await response.Content.ReadAsStringAsync();
 				}
 				catch (HttpRequestException ex)
