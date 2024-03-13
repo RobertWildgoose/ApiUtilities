@@ -1,4 +1,5 @@
 ﻿using ApiUtilities.Common.Interfaces;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -48,9 +49,9 @@ namespace ApiUtilities.Common.Handlers
 			{
 				try
 				{
-					var content = new StringContent(data);
+					var content = new StringContent(data, Encoding.UTF8, "application/json");
 					HttpResponseMessage response = await client.PostAsync(url,content);
-                    if (requireSuccess) { response.EnsureSuccessStatusCode(); }
+					if (requireSuccess) { response.EnsureSuccessStatusCode(); }
 					return await response.Content.ReadAsStringAsync();
 				}
 				catch (HttpRequestException ex)
