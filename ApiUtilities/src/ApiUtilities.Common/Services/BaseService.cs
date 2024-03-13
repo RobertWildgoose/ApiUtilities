@@ -21,12 +21,12 @@ namespace ApiUtilities.Common.Services
 			_apiConfig = apiConfig;
 		}
 
-		public async Task<ResponseContainer<T>> Get<T>(string url) where T : BaseResponse
+		public async Task<ResponseContainer<T>> Get<T>(string url, bool requireSuccess = true) where T : BaseResponse
 		{
 			if (!string.IsNullOrWhiteSpace(_apiConfig.BaseUrl) && !string.IsNullOrWhiteSpace(url))
 			{
 				_requestHandler.RefreshHandler();
-				var response = await _requestHandler.GetAsync($"{_apiConfig.BaseUrl}{url}");
+				var response = await _requestHandler.GetAsync($"{_apiConfig.BaseUrl}{url}", requireSuccess);
 				if (!string.IsNullOrWhiteSpace(response))
 				{
 					try
@@ -50,12 +50,12 @@ namespace ApiUtilities.Common.Services
 			}
 		}
 
-		public async Task<ResponseContainer<List<T>>> GetEnumerable<T>(string url) where T : BaseResponse
+		public async Task<ResponseContainer<List<T>>> GetEnumerable<T>(string url, bool requireSuccess = true) where T : BaseResponse
 		{
 			if (!string.IsNullOrWhiteSpace(_apiConfig.BaseUrl) && !string.IsNullOrWhiteSpace(url))
 			{
 				_requestHandler.RefreshHandler();
-				var response = await _requestHandler.GetAsync($"{_apiConfig.BaseUrl}{url}");
+				var response = await _requestHandler.GetAsync($"{_apiConfig.BaseUrl}{url}", requireSuccess);
 				if (!string.IsNullOrWhiteSpace(response))
 				{
 					try
@@ -79,7 +79,7 @@ namespace ApiUtilities.Common.Services
 			}
 		}
 
-		public async Task<ResponseContainer<T>> Post<T>(string url, object data) where T : BaseResponse
+		public async Task<ResponseContainer<T>> Post<T>(string url, object data, bool requireSuccess = true) where T : BaseResponse
 		{
 			if (!string.IsNullOrWhiteSpace(_apiConfig.BaseUrl) && !string.IsNullOrWhiteSpace(url))
 			{
@@ -89,7 +89,7 @@ namespace ApiUtilities.Common.Services
 					if (!string.IsNullOrEmpty(payload))
 					{
 						_requestHandler.RefreshHandler();
-						var response = await _requestHandler.PostAsync($"{_apiConfig.BaseUrl}{url}", payload);
+						var response = await _requestHandler.PostAsync($"{_apiConfig.BaseUrl}{url}", payload, requireSuccess);
 						if (!string.IsNullOrWhiteSpace(response))
 						{
 							try
