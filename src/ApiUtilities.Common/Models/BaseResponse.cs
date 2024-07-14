@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ApiUtilities.Common.Models
 {
-	public class BaseResponse
+	public abstract class BaseResponse
 	{
-		public BaseResponse() 
-		{ 
-		
-		}
+		public bool Success { get; set; }
+		public string Message { get; set; }
 	}
 }

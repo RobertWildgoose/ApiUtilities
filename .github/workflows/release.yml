@@ -14,10 +14,10 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
     - name: Build
-      run: dotnet build -c Release ./ApiUtilities/src/ApiUtilities.Common/ApiUtilities.Common.csproj
+      run: dotnet build -c Release ./src/ApiUtilities.Common/ApiUtilities.Common.csproj
     - name: Pack nugets
-      run: dotnet pack -c Release ./ApiUtilities/src/ApiUtilities.Common/ApiUtilities.Common.csproj --no-build --output .
+      run: dotnet pack -c Release ./src/ApiUtilities.Common/ApiUtilities.Common.csproj --no-build --output .
     - name: Run Tests
-      run: dotnet test -c Release ./ApiUtilities/tests/ApiUtilities.Tests/ApiUtilities.Tests.csproj
+      run: dotnet test -c Release ./tests/ApiUtilities.Tests/ApiUtilities.Tests.csproj
     - name: Push to NuGet
       run: dotnet nuget push "*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json
