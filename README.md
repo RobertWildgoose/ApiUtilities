@@ -34,6 +34,7 @@ public class ServiceRegistration : BaseServiceRegistration
 {
     public ServiceRegistration(IServiceCollection serviceCollection) : base(serviceCollection)
     {
+        services.AddSingleton<IBaseConfiguration>(configuration);
     }
 
     protected override void RegisterOverride()

@@ -127,7 +127,7 @@ namespace ApiUtilities.Common.Services
 			}
 			catch (Exception ex)
 			{
-                throw new Exception("Cannot Convert Data Object");				responseContainer.Error = $"Request failed: {ex.Message}";
+                throw new Exception("Cannot Convert Data Object");
 			}
 
 			return responseContainer;

@@ -19,8 +19,8 @@ namespace ApiUtilities.Common.Registration
 
 		public void RegisterServices()
 		{
-			RegisterOverride();
 			_serviceCollection.AddSingleton<IHttpClientService, HttpClientService>();
+			RegisterOverride();
 
 		}
 
